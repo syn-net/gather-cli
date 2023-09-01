@@ -1,6 +1,37 @@
-import AppKit
+#if os(Linux)
+  import FoundationNetworking
+#endif
+/*
+#if os(Linux)
+  public class NSObject {
+  }
+  
+  public class URLImporter {
+    /*
+    URLImporter is a class to import data from an external file.
+    The class is assumed to take a nontrivial amount of time to initialize.
+    */
+    var url = "data.txt"
+    // the URLImporter class would provide data importing functionality here
+  }
+
+  public class NSWorkspace: NSObject {
+    lazy var importer = URLImporter()
+    func open(url: String) {}
+    //var shared: [String] = []
+    // the URLManager class would provide data management functionality here
+  }
+#else
+  import AppKit
+  import Cocoa
+#endif
+*/
+
+func openURL(url: URL) -> Bool {
+  print(url)
+  return true
+}
 import ArgumentParser
-import Cocoa
 import Foundation
 import HTML2Text
 import Readability
@@ -246,7 +277,13 @@ func createUrlScheme(template: String, markdown: String, title: String?, noteboo
 
 //     return components.string ?? ""
 // }
-
+#if os(Linux)
+func readFromClipboard(html: Bool = false) -> String? {
+  var output: String?
+  output = "STUB"
+  return output
+}
+#else
 func readFromClipboard(html: Bool = false) -> String? {
     let pasteboard = NSPasteboard.general
     var output: String?
@@ -263,7 +300,14 @@ func readFromClipboard(html: Bool = false) -> String? {
 
     return output
 }
+#endif
 
+#if os(Linux)
+func writeToClipboard(string: String) {
+  print("STUB: Content in clipboard")
+}
+
+#else
 func writeToClipboard(string: String) {
     if string.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
         let pasteboard = NSPasteboard.general
@@ -272,6 +316,7 @@ func writeToClipboard(string: String) {
     }
     print("Content in clipboard")
 }
+#endif
 
 func readSettings(name: String) -> [String: Any] {
     let filename = "\(name).yaml"
@@ -606,9 +651,15 @@ struct Gather: ParsableCommand {
                     if url == nil {
                         throw CleanExit.message("Error parsing generated URL")
                     } else {
+#if os(Linux)
+                        if openURL(url: url!) {
+                            throw CleanExit.message("Added to nvUltra")
+                        }
+#else
                         if NSWorkspace.shared.open(url!) {
                             throw CleanExit.message("Added to nvUltra")
                         }
+#endif
                         throw CleanExit.message("Error adding to nvUltra")
                     }
                 }
@@ -617,9 +668,15 @@ struct Gather: ParsableCommand {
 
                 if nvAdd || urlOpen {
                     let url = URL(string: output!)!
-                    if NSWorkspace.shared.open(url) {
-                        throw CleanExit.message("Added to NV/nvALT")
-                    }
+#if os(Linux)
+                        if openURL(url: url) {
+                            throw CleanExit.message("Added to NV/nvALT")
+                        }
+#else
+                        if NSWorkspace.shared.open(url) {
+                          throw CleanExit.message("Added to NV/nvALT")
+                        }
+#endif
                     throw CleanExit.message("Error adding to NV/nvALT")
                 }
             } else if !urlTemplate.isEmpty {
@@ -627,9 +684,15 @@ struct Gather: ParsableCommand {
 
                 if urlOpen {
                     let url = URL(string: output!)!
+#if os(Linux)
+                    if openURL(url: url) {
+                        throw CleanExit.message("Opened URL")
+                    }
+#else
                     if NSWorkspace.shared.open(url) {
                         throw CleanExit.message("Opened URL")
                     }
+#endif
                     throw CleanExit.message("Error opening URL")
                 }
             }
