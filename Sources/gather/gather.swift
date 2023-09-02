@@ -256,12 +256,51 @@ func createUrlScheme(template: String, markdown: String, title: String?, noteboo
 
 //     return components.string ?? ""
 // }
+
 #if os(Linux)
-func readFromClipboard(html: Bool = false) -> String? {
-  var output: String?
-  output = "STUB"
-  return output
+// NOTE(jeff): Thanks to wowbagger at the Swift.org forums [1] for this snippet!
+//
+// https://forums.swift.org/t/running-launching-an-existing-executable-program-from-swift-on-macos/47653
+func executeCommand(command: String, args: [String]) -> String {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: command)
+
+    process.arguments = args
+    let pipe = Pipe()
+
+    process.standardOutput = pipe
+    try! process.run()
+
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    let output: String = String(decoding: data, as: UTF8.self)
+    return output
 }
+
+func readFromClipboard(html: Bool = false) -> String? {
+    var output: String?
+    let cmd = "/bin/bash"
+    let args = [
+        "-c",
+        "exec xsel --display :0 --clipboard"
+    ]
+
+    // TODO(jeff): I need to ask @ttscoff if he would kindly explain the MacOS
+    // version of this function to me; I am not certain how to branch this
+    // otherwise. In any case, the basic version [1] does now work.
+    //
+    // 1. swift run gather --paste --html
+    if html {
+        output = executeCommand(command: cmd, args: args)
+        if output == nil {
+          disableReadability = true
+        }
+    } else {
+        // STUB(jeff): ...
+    }
+
+    return output
+}
+
 #else
 func readFromClipboard(html: Bool = false) -> String? {
     let pasteboard = NSPasteboard.general
@@ -282,8 +321,26 @@ func readFromClipboard(html: Bool = false) -> String? {
 #endif
 
 #if os(Linux)
+// FIXME(jeff): We must ensure that the input we are "pasting" into the
+// shell is properly sanitized, else we risk arbitrary code execution,
+// such as in the example below [1]. As soon as /bin/sh finds a pair of
+// tilde characters (`), it immediately begins to execute everything
+// within the pair, as one would expect within a UNIX shell context.
+//
+// 1. swift run gather --copy "https://forums.swift.org/t/running-launching-an-existing-executable-program-from-swift-on-macos/47653"
+//
+// /bin/sh: line 1: executableURL: command not found
 func writeToClipboard(string: String) {
-  print("STUB: Content in clipboard")
+    let cmd = "/bin/sh"
+    let args = [
+        "-c",
+        "exec echo '" + string + "' | xsel --clipboard -i --display :0"
+    ]
+    if string.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
+        let result = executeCommand(command: cmd, args: args)
+        //print("DEBUG\n\n" + result)
+    }
+    print("Content in clipboard")
 }
 
 #else
