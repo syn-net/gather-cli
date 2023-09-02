@@ -279,6 +279,9 @@ func executeCommand(command: String, args: [String]) -> String {
 
 func readFromClipboard(html: Bool = false) -> String? {
     var output: String?
+    /* TODO(jeff): This ought to be /bin/sh for the extra bit of performance --
+    I will change it as soon as I am able to double check that nothing breaks by
+    doing so. */
     let cmd = "/bin/bash"
     let args = [
         "-c",
@@ -293,10 +296,12 @@ func readFromClipboard(html: Bool = false) -> String? {
     if html {
         output = executeCommand(command: cmd, args: args)
         if output == nil {
-          disableReadability = true
+            /* output = executeCommand(command: cmd, args: args) */
+        } else {
+            disableReadability = true
         }
     } else {
-        // STUB(jeff): ...
+        /* output = */
     }
 
     return output
