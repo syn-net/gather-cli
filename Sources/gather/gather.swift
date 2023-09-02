@@ -1,36 +1,15 @@
 #if os(Linux)
   import FoundationNetworking
-#endif
-/*
-#if os(Linux)
-  public class NSObject {
-  }
-  
-  public class URLImporter {
-    /*
-    URLImporter is a class to import data from an external file.
-    The class is assumed to take a nontrivial amount of time to initialize.
-    */
-    var url = "data.txt"
-    // the URLImporter class would provide data importing functionality here
-  }
 
-  public class NSWorkspace: NSObject {
-    lazy var importer = URLImporter()
-    func open(url: String) {}
-    //var shared: [String] = []
-    // the URLManager class would provide data management functionality here
+  func openURL(url: URL) -> Bool {
+    print(url)
+    return true
   }
 #else
   import AppKit
   import Cocoa
 #endif
-*/
 
-func openURL(url: URL) -> Bool {
-  print(url)
-  return true
-}
 import ArgumentParser
 import Foundation
 import HTML2Text
