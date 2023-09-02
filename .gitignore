@@ -13,4 +13,5 @@ package
 .gitsecret/keys/random_seed
 !*.secret
 gather
-!Sources/gather/gather.swift
+!gather.swift
+!Sources/gather
