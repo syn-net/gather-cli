@@ -260,7 +260,7 @@ func createUrlScheme(template: String, markdown: String, title: String?, noteboo
 #if os(Linux)
 // NOTE(jeff): Thanks to wowbagger at the Swift.org forums [1] for this snippet!
 //
-// https://forums.swift.org/t/running-launching-an-existing-executable-program-from-swift-on-macos/47653
+// 1. https://forums.swift.org/t/running-launching-an-existing-executable-program-from-swift-on-macos/47653
 func executeCommand(command: String, args: [String]) -> String {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: command)
@@ -270,6 +270,7 @@ func executeCommand(command: String, args: [String]) -> String {
 
     process.standardOutput = pipe
     try! process.run()
+    process.waitUntilExit()
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     let output: String = String(decoding: data, as: UTF8.self)
@@ -281,7 +282,7 @@ func readFromClipboard(html: Bool = false) -> String? {
     let cmd = "/bin/bash"
     let args = [
         "-c",
-        "exec xsel --display :0 --clipboard"
+        "exec xsel --display :0 --clipboard",
     ]
 
     // TODO(jeff): I need to ask @ttscoff if he would kindly explain the MacOS
@@ -324,7 +325,7 @@ func readFromClipboard(html: Bool = false) -> String? {
 // FIXME(jeff): We must ensure that the input we are "pasting" into the
 // shell is properly sanitized, else we risk arbitrary code execution,
 // such as in the example below [1]. As soon as /bin/sh finds a pair of
-// tilde characters (`), it immediately begins to execute everything
+// backtick characters (`), it immediately begins to execute everything
 // within the pair, as one would expect within a UNIX shell context.
 //
 // 1. swift run gather --copy "https://forums.swift.org/t/running-launching-an-existing-executable-program-from-swift-on-macos/47653"
@@ -334,7 +335,7 @@ func writeToClipboard(string: String) {
     let cmd = "/bin/sh"
     let args = [
         "-c",
-        "exec echo '" + string + "' | xsel --clipboard -i --display :0"
+        "exec echo '" + string + "' | xsel --clipboard -i --display :0",
     ]
     if string.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
         let result = executeCommand(command: cmd, args: args)
