@@ -27,9 +27,9 @@ let package = Package(
                 .product(name: "Yams", package: "Yams"),
             ]
         ),
-        // .testTarget(
-        //     name: "gather-cliTests",
-        //     dependencies: ["gather"]
-        // ),
+        .testTarget(
+            name: "gather-cliTests",
+            dependencies: ["gather"]
+        )
     ]
 )
