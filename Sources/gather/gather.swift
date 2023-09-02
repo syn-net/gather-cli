@@ -722,6 +722,8 @@ struct Gather: ParsableCommand {
                 if urlOpen {
                     let url = URL(string: output!)!
 #if os(Linux)
+                    // FIXME(jeff): I need to finish this stub impl out!
+                    //executeCommand(command: "/usr/bin/xdg-open", args: url)
                     if openURL(url: url) {
                         throw CleanExit.message("Opened URL")
                     }
