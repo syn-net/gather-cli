@@ -1,3 +1,4 @@
+var WIP = true
 #if os(Linux)
   import FoundationNetworking
 
@@ -326,6 +327,34 @@ func readFromClipboard(html: Bool = false) -> String? {
 }
 #endif
 
+#if os(Linux) && WIP
+func shellPathFromPOSIXPath(string: String) -> String {
+    var pattern =
+        #/([ !\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\,\\:\\;\\<\\=\\>\\?\\[\\]\\`\\{\\|\\}\\~])/#
+/*  //let NSRegularExpression regex = nil;
+    if (!regex) {
+        let pattern =
+          /([ !\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\,\\:\\;\\<\\=\\>\\?\\[\\]\\`\\{\\|\\}\\~])/
+        regex =
+          [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil]
+    }
+*/
+/*  let RegEx<output> result =
+      [regex stringByReplacingMatchesInString: string,
+                                      options:0
+                                        range:NSMakeRange(0, string.length)
+                                 withTemplate:@"\\\\$1"];
+*/
+    //var newname = filename.replacingOccurrences(of: #"%date"#, with: iso_datetime(), options: [.regularExpression, .caseInsensitive])
+    return string.replacingOccurrences(
+        of: pattern,
+        with: "\\\\",
+        //with: "\\\\$1",
+        options: [.regularExpression, .caseInsensitive]
+    )
+}
+#endif
+
 #if os(Linux)
 // FIXME(jeff): We must ensure that the input we are "pasting" into the
 // shell is properly sanitized, else we risk arbitrary code execution,
@@ -340,6 +369,7 @@ func writeToClipboard(string: String) {
     let cmd = "/bin/sh"
     let args = [
         "-c",
+        //shellPathFromPOSIXPath(string: "exec echo '" + string + "' | xsel --clipboard -i --display :0"),
         "exec echo '" + string + "' | xsel --clipboard -i --display :0",
     ]
     if string.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
